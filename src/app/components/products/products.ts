@@ -20,6 +20,9 @@ export class ProductsComponent implements OnInit {
 
   products: Product[] = [];
 
+  selectedProductId: number = 0;
+  selectedProductName: string = '';
+
   constructor(
     private productService: ProductService,
     private cdr: ChangeDetectorRef
@@ -85,21 +88,67 @@ export class ProductsComponent implements OnInit {
     // this.router.navigate(['/products/edit', id]);
   }
 
-  deleteProduct(id: number): void {
+ deleteProduct(id: number, productName: string): void {
 
-    const confirmDelete = confirm(
-      'Are you sure you want to delete this product?'
-    );
+    this.selectedProductId = id;
+    this.selectedProductName = productName;
 
-    if (confirmDelete) {
-
-      console.log('Delete Product Id:', id);
-
-      // Later:
-      // this.productService.deleteProduct(id)
-      //   .subscribe(() => {
-      //      this.loadProducts();
-      //   });
-    }
   }
+
+  confirmDelete(): void {
+
+    this.productService
+      .deleteProduct(this.selectedProductId)
+      .subscribe({
+
+        next: () => {
+
+          // Remove from Angular array
+          this.products = this.products.filter(
+            p => p.id !== this.selectedProductId
+          );
+
+          this.cdr.detectChanges();
+
+          const table = $('#productsTable').DataTable();
+
+          if (this.products.length === 0) {
+
+            table.clear().draw();
+
+          } else {
+
+            table.clear();
+            table.rows.add(
+              $('#productsTable tbody tr')
+            );
+            table.draw();
+
+          }
+
+          // Close modal
+          const modalElement =
+            document.getElementById('deleteModal');
+
+          if (modalElement) {
+
+            const modal =
+              (window as any).bootstrap.Modal.getInstance(
+                modalElement
+              );
+
+            modal?.hide();
+          }
+
+        },
+
+        error: (error) => {
+
+          console.error(error);
+
+        }
+
+      });
+  }
+
 }

@@ -51,7 +51,9 @@
         <i
           class="fas fa-trash text-danger action-icon"
           title="Delete"
-          (click)="deleteProduct(product.id)">
+          data-bs-toggle="modal"
+          data-bs-target="#deleteModal"
+          (click)="deleteProduct(product.id, product.name)">
         </i>
 
       </td>
@@ -60,5 +62,60 @@
   </tbody>
 
 </table>
+
+</div>
+
+<div
+  class="modal fade mt-5"
+  id="deleteModal"
+  tabindex="-1"
+  aria-labelledby="deleteModalLabel"
+  aria-hidden="true">
+
+  <div class="modal-dialog">
+
+    <div class="modal-content">
+
+      <div class="modal-header">
+
+        <h5 class="modal-title" id="deleteModalLabel">
+          Confirm Delete
+        </h5>
+
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal">
+        </button>
+
+      </div>
+
+      <div class="modal-body">
+
+       Are you sure you want to delete the product <strong>"{{ selectedProductName }}"</strong>?
+
+      </div>
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-bs-dismiss="modal">
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-danger"
+          (click)="confirmDelete()">
+          Delete
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
 
 </div>
