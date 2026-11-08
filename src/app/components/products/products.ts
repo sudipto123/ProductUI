@@ -26,6 +26,10 @@ export class ProductsComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.loadProducts();
+  }
+
+  private loadProducts(): void {
 
     this.productService.getProducts().subscribe({
       next: (response) => {
@@ -43,12 +47,19 @@ export class ProductsComponent implements OnInit {
           $('#productsTable').DataTable({
             pageLength: 5,
             responsive: true,
+
+            order: [[1, 'asc']], // Sort by Id ascending
+
             columnDefs: [
-                {
-                    targets: [0], // Id column
-                    visible: false,
-                    searchable: false
-                }
+              {
+                targets: [0], // Id column
+                visible: false,
+                searchable: false
+              },
+              {
+                targets: '_all',
+                className: 'dt-center'
+              }
             ]
         });
 
@@ -60,5 +71,35 @@ export class ProductsComponent implements OnInit {
       }
     });
 
+  }
+
+  addProduct(): void {
+    
+  }
+
+  editProduct(id: number): void {
+
+    console.log('Edit Product Id:', id);
+
+    // Later:
+    // this.router.navigate(['/products/edit', id]);
+  }
+
+  deleteProduct(id: number): void {
+
+    const confirmDelete = confirm(
+      'Are you sure you want to delete this product?'
+    );
+
+    if (confirmDelete) {
+
+      console.log('Delete Product Id:', id);
+
+      // Later:
+      // this.productService.deleteProduct(id)
+      //   .subscribe(() => {
+      //      this.loadProducts();
+      //   });
+    }
   }
 }

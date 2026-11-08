@@ -35,3 +35,13 @@ table.dataTable thead th {
     background-color: #f8f9fa;
     font-weight: bold;
 }
+
+#productsTable th,
+#productsTable td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.btn-sm {
+    min-width: 75px;
+}
