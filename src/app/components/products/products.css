@@ -45,3 +45,13 @@ table.dataTable thead th {
 .btn-sm {
     min-width: 75px;
 }
+
+.save-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+#productForm input[type="text"],
+#productForm textarea {
+    text-transform: uppercase;
+}

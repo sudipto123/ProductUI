@@ -6,13 +6,14 @@ import {
 
 import { CommonModule } from '@angular/common';
 import { ProductService, Product } from '../../services/product';
+import { FormsModule } from '@angular/forms';
 
 declare var $: any;
 
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './products.html',
   styleUrls: ['./products.css']
 })
@@ -31,7 +32,7 @@ export class ProductsComponent implements OnInit {
   ngOnInit(): void {
     this.loadProducts();
   }
-
+  
   private loadProducts(): void {
 
     this.productService.getProducts().subscribe({
@@ -43,30 +44,29 @@ export class ProductsComponent implements OnInit {
 
         setTimeout(() => {
 
-          if ($.fn.DataTable.isDataTable('#productsTable')) {
-            $('#productsTable').DataTable().destroy();
-          }
+        if ($.fn.DataTable.isDataTable('#productsTable')) {
+          $('#productsTable').DataTable().destroy();
+        }
 
-          $('#productsTable').DataTable({
-            pageLength: 5,
-            responsive: true,
-
-            order: [[1, 'asc']], // Sort by Id ascending
-
-            columnDefs: [
-              {
-                targets: [0], // Id column
-                visible: false,
-                searchable: false
-              },
-              {
-                targets: '_all',
-                className: 'dt-center'
-              }
-            ]
+        $('#productsTable').DataTable({
+          destroy: true,
+          pageLength: 5,
+          responsive: true,
+          order: [[1, 'asc']],
+          columnDefs: [
+            {
+              targets: [0],
+              visible: false,
+              searchable: false
+            },
+            {
+              targets: '_all',
+              className: 'dt-center'
+            }
+          ]
         });
 
-        }, 100);
+      }, 100);
 
       },
       error: (error) => {
@@ -77,7 +77,20 @@ export class ProductsComponent implements OnInit {
   }
 
   addProduct(): void {
-    
+
+    const modalElement =
+      document.getElementById('addProductModal');
+
+    if (modalElement) {
+
+      const modal =
+        (window as any).bootstrap.Modal.getInstance(
+          modalElement
+        );
+
+      modal?.hide();
+    }
+
   }
 
   editProduct(id: number): void {
@@ -103,7 +116,6 @@ export class ProductsComponent implements OnInit {
 
         next: () => {
 
-          // Remove from Angular array
           this.products = this.products.filter(
             p => p.id !== this.selectedProductId
           );
@@ -115,14 +127,6 @@ export class ProductsComponent implements OnInit {
           if (this.products.length === 0) {
 
             table.clear().draw();
-
-          } else {
-
-            table.clear();
-            table.rows.add(
-              $('#productsTable tbody tr')
-            );
-            table.draw();
 
           }
 
@@ -149,6 +153,7 @@ export class ProductsComponent implements OnInit {
         }
 
       });
+
   }
 
 }

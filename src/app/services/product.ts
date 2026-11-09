@@ -25,4 +25,13 @@ export class ProductService {
   deleteProduct(id: number): Observable<void> {
     return this.http.delete<void>(this.apiUrl + 'Products/' + id);
   }
+
+  createProduct(product: Product): Observable<Product> {
+
+    return this.http.post<Product>(
+      this.apiUrl + 'Products',
+      product
+    );
+
+  }
 }

@@ -2,14 +2,21 @@
 
   <h2 class="text-center">Products List</h2>
 
+  <!-- <p>Total Products: {{ products.length }}</p>
+
+  <ul>
+    <li *ngFor="let product of products">
+      {{ product.name }}
+    </li>
+  </ul> -->
+
   <div class="d-flex justify-content-end mb-3">
     <button
-      class="btn btn-primary btn-sm"
-      (click)="addProduct()">
+      type="button"
+      class="btn btn-primary mb-3">
       <i class="fas fa-plus"></i>
       Add Product
     </button>
-
   </div>
 
   <table
