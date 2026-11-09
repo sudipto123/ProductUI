@@ -21,6 +21,13 @@ export class ProductsComponent implements OnInit {
 
   products: Product[] = [];
 
+  newProduct: Product = {
+    id: 0,
+    name: '',
+    price: 0,
+    description: ''
+  };
+
   selectedProductId: number = 0;
   selectedProductName: string = '';
 
@@ -153,6 +160,15 @@ export class ProductsComponent implements OnInit {
         }
 
       });
+
+  }
+
+  convertToUpperCase(field: 'name' | 'description'): void {
+
+    if (this.newProduct[field]) {
+      this.newProduct[field] =
+        this.newProduct[field].toUpperCase();
+    }
 
   }
 
