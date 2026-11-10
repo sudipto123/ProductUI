@@ -2,13 +2,13 @@
 
   <h2 class="text-center">Products List</h2>
 
-  <p>Total Products: {{ products.length }}</p>
+  <!-- <p>Total Products: {{ products.length }}</p>
 
   <ul>
     <li *ngFor="let product of products">
       {{ product.name }}
     </li>
-  </ul>
+  </ul> -->
 
   <div class="d-flex justify-content-end mb-3">
     <button
@@ -37,37 +37,6 @@
   </thead>
 
   <tbody>
-    <tr *ngFor="let product of products">
-
-      <td>{{ product.id }}</td>
-
-      <td>{{ product.name }}</td>
-
-      <td>
-        {{ product.price | currency:'INR':'symbol':'1.0-0' }}
-      </td>
-
-      <td>{{ product.description }}</td>
-
-      <td>
-
-        <i
-          class="fas fa-pen-to-square text-primary me-3 action-icon"
-          title="Edit"
-          (click)="editProduct(product.id)">
-        </i>
-
-        <i
-          class="fas fa-trash text-danger action-icon"
-          title="Delete"
-          data-bs-toggle="modal"
-          data-bs-target="#deleteModal"
-          (click)="deleteProduct(product.id, product.name)">
-        </i>
-
-      </td>
-
-    </tr>
   </tbody>
 
 </table>

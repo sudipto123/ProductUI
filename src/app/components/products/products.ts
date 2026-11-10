@@ -23,6 +23,8 @@ export class ProductsComponent implements OnInit {
 
   products: Product[] = [];
 
+  private dataTable: any;
+
   newProduct: Product = {
     id: 0,
     name: '',
@@ -52,13 +54,30 @@ export class ProductsComponent implements OnInit {
 
         this.cdr.detectChanges();
 
-        this.rebuildTable(this.products);
+        // Initialize DataTable after Angular renders the data
+        setTimeout(() => {
+
+          if ($.fn.DataTable.isDataTable('#productsTable')) {
+
+            this.dataTable = $('#productsTable').DataTable();
+
+            this.dataTable.clear();
+            this.dataTable.rows.add(this.products);
+            this.dataTable.draw();
+
+          } else {
+
+            this.initializeDataTable();
+
+          }
+
+        }, 0);
 
       },
 
       error: (error) => {
 
-        console.error(error);
+        console.error('Error Loading Products:', error);
 
       }
 
@@ -66,48 +85,116 @@ export class ProductsComponent implements OnInit {
 
   }
 
-  private rebuildTable(products: Product[]): void {
+  private initializeDataTable(): void {
 
-    console.log('Products passed to DataTable:', products);
+    this.dataTable = $('#productsTable').DataTable({
 
-    this.cdr.detectChanges();
+      data: this.products,
 
-    setTimeout(() => {
+      columns: [
 
-      if ($.fn.DataTable.isDataTable('#productsTable')) {
-        $('#productsTable').DataTable().destroy();
+        { data: 'id' },
+
+        { data: 'name' },
+
+        {
+          data: 'price',
+          render: (data: number) => {
+            return '₹' + Number(data).toLocaleString('en-IN');
+          }
+        },
+
+        { data: 'description' },
+
+        {
+          data: null,
+          orderable: false,
+          searchable: false,
+
+          render: (data: any, type: string, row: Product) => {
+
+            return `
+              <i
+                class="fas fa-pen-to-square text-primary me-3 action-icon edit-product"
+                title="Edit"
+                data-id="${row.id}">
+              </i>
+
+              <i
+                class="fas fa-trash text-danger action-icon delete-product"
+                title="Delete"
+                data-id="${row.id}"
+                data-name="${this.escapeHtml(row.name)}"
+                data-bs-toggle="modal"
+                data-bs-target="#deleteModal">
+              </i>
+            `;
+
+          }
+
+        }
+
+      ],
+
+      pageLength: 5,
+      responsive: true,
+      ordering: true,
+      searching: true,
+
+      order: [[1, 'asc']],
+
+      columnDefs: [
+        {
+          targets: [0],
+          visible: false,
+          searchable: false
+        },
+        {
+          targets: '_all',
+          className: 'dt-center'
+        }
+      ]
+
+    });
+
+    // Edit button click
+    $('#productsTable tbody').on(
+      'click',
+      '.edit-product',
+      (event: any) => {
+
+        const id = Number($(event.currentTarget).attr('data-id'));
+
+        this.editProduct(id);
+
       }
+    );
 
-      this.cdr.detectChanges();
+    // Delete button click
+    $('#productsTable tbody').on(
+      'click',
+      '.delete-product',
+      (event: any) => {
 
-      setTimeout(() => {
+        const id = Number($(event.currentTarget).attr('data-id'));
 
-        console.log(
-          'Rows currently rendered:',
-          $('#productsTable tbody tr').length
-        );
+        const productName = $(event.currentTarget).attr('data-name');
 
-        $('#productsTable').DataTable({
-          destroy: true,
-          pageLength: 5,
-          responsive: true,
-          order: [[1, 'asc']],
-          columnDefs: [
-            {
-              targets: [0],
-              visible: false,
-              searchable: false
-            },
-            {
-              targets: '_all',
-              className: 'dt-center'
-            }
-          ]
-        });
+        this.deleteProduct(id, productName);
 
-      }, 500);
+      }
+    );
 
-    }, 500);
+  }
+
+  private escapeHtml(value: string): string {
+
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
 
   }
 
@@ -119,19 +206,19 @@ export class ProductsComponent implements OnInit {
 
         next: (response) => {
 
-          // Add new product to the array
-          //this.products.push(response);
-
+          // Add new product to Angular array
           this.products = [...this.products, response];
 
-          console.log('After Push:', this.products);
+          console.log('After Adding Product:', this.products);
 
-          this.cdr.detectChanges();
+          // Add new row directly to DataTable
+          if (this.dataTable) {
 
-          // Refresh table using latest array
-          this.rebuildTable(this.products);
+            this.dataTable.row.add(response).draw(false);
 
-          // Close modal
+          }
+
+          // Close Bootstrap modal
           const modalElement =
             document.getElementById('addProductModal');
 
@@ -143,9 +230,10 @@ export class ProductsComponent implements OnInit {
               );
 
             modal?.hide();
+
           }
 
-          // Reset model
+          // Reset product model
           this.newProduct = {
             id: 0,
             name: '',
@@ -153,7 +241,7 @@ export class ProductsComponent implements OnInit {
             description: ''
           };
 
-          // Reset validation state
+          // Reset form validation
           productForm.resetForm();
 
         },
@@ -194,24 +282,23 @@ export class ProductsComponent implements OnInit {
 
         next: () => {
 
+          // Remove product from Angular array
           this.products = this.products.filter(
             p => p.id !== this.selectedProductId
           );
 
-          this.cdr.detectChanges();
+          // Remove corresponding row from DataTable
+          if (this.dataTable) {
 
-          const table = $('#productsTable').DataTable();
-
-          if (this.products.length === 0) {
-
-            table.clear().draw();
+            this.dataTable.rows(
+              (index: number, data: Product) => {
+                return data.id === this.selectedProductId;
+              }
+            ).remove().draw(false);
 
           }
-          // else{
-          //   this.loadProducts();
-          // }
 
-          // Close modal
+          // Close Bootstrap modal
           const modalElement =
             document.getElementById('deleteModal');
 
@@ -223,13 +310,21 @@ export class ProductsComponent implements OnInit {
               );
 
             modal?.hide();
+
           }
+
+          // Reset selected product
+          this.selectedProductId = 0;
+          this.selectedProductName = '';
 
         },
 
         error: (error) => {
 
-          console.error(error);
+          console.error(
+            'Error Deleting Product:',
+            error
+          );
 
         }
 
