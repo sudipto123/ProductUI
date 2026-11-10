@@ -25,6 +25,8 @@ export class ProductsComponent implements OnInit {
 
   private dataTable: any;
 
+  isEditMode: boolean = false;
+
   newProduct: Product = {
     id: 0,
     name: '',
@@ -266,10 +268,47 @@ export class ProductsComponent implements OnInit {
 
   editProduct(id: number): void {
 
-    console.log('Edit Product Id:', id);
+    this.productService.getProductById(id).subscribe({
 
-    // Later:
-    // this.router.navigate(['/products/edit', id]);
+      next: (response) => {
+
+        console.log('API Response:', response);
+
+        this.newProduct = {
+          id: response.id,
+          name: response.name,
+          price: response.price,
+          description: response.description
+        };
+
+        this.isEditMode = true;
+
+        // Trigger Angular change detection
+        this.cdr.detectChanges();
+
+        // Open Edit Modal
+        const modalElement =
+          document.getElementById('editProductModal');
+
+        if (modalElement) {
+
+          const modal =
+            (window as any).bootstrap.Modal.getOrCreateInstance(
+              modalElement
+            );
+
+          modal.show();
+
+        }
+
+      },
+
+      error: (error) => {
+        console.error('Error Fetching Product:', error);
+      }
+
+    });
+
   }
 
  deleteProduct(id: number, productName: string): void {
@@ -328,6 +367,82 @@ export class ProductsComponent implements OnInit {
 
           console.error(
             'Error Deleting Product:',
+            error
+          );
+
+        }
+
+      });
+
+  }
+
+  updateProduct(productForm: NgForm): void {
+
+    // Create a copy of the product being updated
+    const updatedProduct: Product = {
+      ...this.newProduct
+    };
+
+    this.productService
+      .updateProduct(updatedProduct)
+      .subscribe({
+
+        next: () => {
+
+          console.log('Product Updated Successfully:', updatedProduct);
+
+          // Update Angular products array
+          this.products = this.products.map(p =>
+            p.id === updatedProduct.id ? updatedProduct : p
+          );
+
+          // Update existing DataTable row
+          if (this.dataTable) {
+
+            const row = this.dataTable.row(
+              (index: number, data: Product) => {
+                return data.id === updatedProduct.id;
+              }
+            );
+
+            row.data(updatedProduct).draw(false);
+
+          }
+
+          // Close Edit Product Modal
+          const modalElement =
+            document.getElementById('editProductModal');
+
+          if (modalElement) {
+
+            const modal =
+              (window as any).bootstrap.Modal.getInstance(
+                modalElement
+              );
+
+            modal?.hide();
+
+          }
+
+          // Reset product model
+          this.newProduct = {
+            id: 0,
+            name: '',
+            price: 0,
+            description: ''
+          };
+
+          this.isEditMode = false;
+
+          // Reset form validation
+          productForm.resetForm();
+
+        },
+
+        error: (error) => {
+
+          console.error(
+            'Error Updating Product:',
             error
           );
 

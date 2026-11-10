@@ -16,6 +16,8 @@ export class ProductService {
 
   private apiUrl = 'http://localhost:8080/api/';
 
+  ProductId: number = 0;
+
   constructor(private http: HttpClient) { }
 
   getProducts(): Observable<Product[]> {
@@ -30,6 +32,18 @@ export class ProductService {
 
     return this.http.post<Product>(
       this.apiUrl + 'Products',
+      product
+    );
+  }
+
+  getProductById(id: number): Observable<Product> {
+    return this.http.get<Product>(this.apiUrl + 'Products/' + id);
+  }
+
+  updateProduct(product: Product): Observable<void> {
+
+    return this.http.put<void>(
+      this.apiUrl + 'Products/' + product.id,
       product
     );
 
