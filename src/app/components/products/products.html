@@ -2,13 +2,13 @@
 
   <h2 class="text-center">Products List</h2>
 
-  <!-- <p>Total Products: {{ products.length }}</p>
+  <p>Total Products: {{ products.length }}</p>
 
   <ul>
     <li *ngFor="let product of products">
       {{ product.name }}
     </li>
-  </ul> -->
+  </ul>
 
   <div class="d-flex justify-content-end mb-3">
     <button
@@ -131,7 +131,7 @@
 
 <!-- Add Product Modal -->
 <div
-  class="modal fade"
+  class="modal fade mt-5"
   id="addProductModal"
   tabindex="-1"
   aria-labelledby="addProductModalLabel"
@@ -286,16 +286,8 @@
             type="button"
             class="btn btn-success save-btn"
             [disabled]="productForm.invalid"
-            [title]="productForm.invalid ? 'Please fill all mandatory fields' : 'Save Product'"
-            (click)="addProduct()">
-
-            <i
-              *ngIf="productForm.invalid"
-              class="fas fa-ban me-2">
-            </i>
-
+            (click)="addProduct(productForm)">
             Save
-
           </button>
 
         </div>
