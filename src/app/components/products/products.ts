@@ -176,11 +176,16 @@ export class ProductsComponent implements OnInit {
       '.delete-product',
       (event: any) => {
 
-        const id = Number($(event.currentTarget).attr('data-id'));
+        const id = Number(
+          $(event.currentTarget).attr('data-id')
+        );
 
         const productName = $(event.currentTarget).attr('data-name');
 
         this.deleteProduct(id, productName);
+
+        // Update Angular view
+        this.cdr.detectChanges();
 
       }
     );
@@ -271,7 +276,7 @@ export class ProductsComponent implements OnInit {
 
     this.selectedProductId = id;
     this.selectedProductName = productName;
-
+    console.log(this.selectedProductId, this.selectedProductName);
   }
 
   confirmDelete(): void {
