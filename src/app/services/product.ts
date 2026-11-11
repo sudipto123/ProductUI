@@ -14,7 +14,7 @@ export interface Product {
 })
 export class ProductService {
 
-  private apiUrl = 'http://localhost:8080/api/';
+  private apiUrl = 'http://localhost:82/api/';
 
   ProductId: number = 0;
 

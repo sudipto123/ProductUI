@@ -15,7 +15,8 @@
       type="button"
       class="btn btn-primary mb-3"
       data-bs-toggle="modal"
-      data-bs-target="#addProductModal">
+      data-bs-target="#addProductModal"
+       (click)="openAddModal(productForm)">
       <i class="fas fa-plus"></i>
       Add Product
     </button>
@@ -127,6 +128,8 @@
 
       </div>
 
+      
+
       <form
         id="productForm"
         #productForm="ngForm">
@@ -136,6 +139,7 @@
           <!-- Product Name & Price -->
           <div class="row">
 
+            
             <div class="col-md-8 mb-3">
 
               <label class="form-label text-start d-block">
@@ -149,10 +153,12 @@
                 #name="ngModel"
                 [(ngModel)]="newProduct.name"
                 (input)="convertToUpperCase('name')"
+                (ngModelChange)="checkDuplicateProductName($event)"
                 required
                 minlength="3"
                 maxlength="100">
 
+              <!-- Angular validation messages -->
               <div
                 class="text-danger mt-1 text-start"
                 *ngIf="name.invalid && name.touched">
@@ -167,7 +173,17 @@
 
               </div>
 
+              <!-- Duplicate product error -->
+              <div
+                *ngIf="errorMessage"
+                class="text-danger mt-1 text-start">
+
+                <small>{{ errorMessage }}</small>
+
+              </div>
+
             </div>
+
 
             <div class="col-md-4 mb-3 text-start">
 
@@ -320,10 +336,12 @@
                 #name="ngModel"
                 [(ngModel)]="newProduct.name"
                 (input)="convertToUpperCase('name')"
+                (ngModelChange)="checkDuplicateProductName($event)"
                 required
                 minlength="3"
                 maxlength="100">
 
+              <!-- Angular validation -->
               <div
                 class="text-danger mt-1 text-start"
                 *ngIf="name.invalid && name.touched">
@@ -335,6 +353,15 @@
                 <small *ngIf="name.errors?.['minlength']">
                   Minimum 3 characters required.
                 </small>
+
+              </div>
+
+              <!-- Duplicate error -->
+              <div
+                *ngIf="errorMessage"
+                class="text-danger mt-1 text-start">
+
+                <small>{{ errorMessage }}</small>
 
               </div>
 

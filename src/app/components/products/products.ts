@@ -27,6 +27,8 @@ export class ProductsComponent implements OnInit {
 
   isEditMode: boolean = false;
 
+  errorMessage: string = '';
+
   newProduct: Product = {
     id: 0,
     name: '',
@@ -205,66 +207,74 @@ export class ProductsComponent implements OnInit {
 
   }
 
-  addProduct(productForm: NgForm): void {
+  
+addProduct(productForm: NgForm): void {
 
-    this.productService
-      .createProduct(this.newProduct)
-      .subscribe({
+  this.productService
+    .createProduct(this.newProduct)
+    .subscribe({
 
-        next: (response) => {
+      next: (response) => {
 
-          // Add new product to Angular array
-          this.products = [...this.products, response];
+        this.products = [...this.products, response];
 
-          console.log('After Adding Product:', this.products);
+        console.log('After Adding Product:', this.products);
 
-          // Add new row directly to DataTable
-          if (this.dataTable) {
+        if (this.dataTable) {
+          this.dataTable.row.add(response).draw(false);
+        }
 
-            this.dataTable.row.add(response).draw(false);
+        const modalElement =
+          document.getElementById('addProductModal');
 
-          }
+        if (modalElement) {
+          const modal =
+            (window as any).bootstrap.Modal.getInstance(
+              modalElement
+            );
 
-          // Close Bootstrap modal
-          const modalElement =
-            document.getElementById('addProductModal');
+          modal?.hide();
+        }
 
-          if (modalElement) {
+        this.newProduct = {
+          id: 0,
+          name: '',
+          price: 0,
+          description: ''
+        };
 
-            const modal =
-              (window as any).bootstrap.Modal.getInstance(
-                modalElement
-              );
+        productForm.resetForm();
 
-            modal?.hide();
+      },
 
-          }
+      error: (error) => {
 
-          // Reset product model
-          this.newProduct = {
-            id: 0,
-            name: '',
-            price: 0,
-            description: ''
-          };
+        console.log('API Error:', error);
 
-          // Reset form validation
-          productForm.resetForm();
+        if (error.status === 409) {
 
-        },
+          this.errorMessage =
+            error.error?.message ||
+            'A product with this name already exists.';
 
-        error: (error) => {
+        } else {
 
-          console.error(
-            'Error Creating Product:',
-            error
-          );
+          this.errorMessage =
+            'Something went wrong while creating the product.';
 
         }
 
-      });
+        console.log('Error Message Property:', this.errorMessage);
 
-  }
+        // Force Angular to refresh the view
+        this.cdr.detectChanges();
+
+      }
+
+    });
+
+}
+
 
   editProduct(id: number): void {
 
@@ -296,6 +306,9 @@ export class ProductsComponent implements OnInit {
             (window as any).bootstrap.Modal.getOrCreateInstance(
               modalElement
             );
+
+          this.errorMessage = ''; // Clear any previous error messages
+          
 
           modal.show();
 
@@ -458,6 +471,51 @@ export class ProductsComponent implements OnInit {
       this.newProduct[field] =
         this.newProduct[field].toUpperCase();
     }
+
+  }
+
+  checkDuplicateProductName(name: string): void {
+
+    const productName = name.trim().toLowerCase();
+
+    if (!productName) {
+      this.errorMessage = '';
+      return;
+    }
+
+    const duplicate = this.products.some(product =>
+      product.name.trim().toLowerCase() === productName &&
+      product.id !== this.newProduct.id
+    );
+
+    if (duplicate) {
+      this.errorMessage = 'A product with this name already exists.';
+    } else {
+      this.errorMessage = '';
+    }
+
+    this.cdr.detectChanges();
+
+  }
+
+  openAddModal(productForm: NgForm): void {
+
+    // Reset product values
+    this.newProduct = {
+      id: 0,
+      name: '',
+      price: 0,
+      description: ''
+    };
+
+    // Clear duplicate error
+    this.errorMessage = '';
+
+    // Reset Angular form validation
+    productForm.resetForm(this.newProduct);
+
+    // Ensure Add mode
+    this.isEditMode = false;
 
   }
 
